@@ -56,7 +56,7 @@ api.use('/flagged', flaggedRoutes);
 api.use('/event', eventRoutes);
 api.use(homepageRoutes);
 
-app.use('/api', api);
+app.use('/', api);
 
 async function start() {
   const uri = process.env.MONGO_URI ?? process.env.MONGODB_URI;
