@@ -3,16 +3,44 @@ import 'dotenv/config';
 import { TRACKS } from '../src/constants/tracks';
 import { connectDb } from '../src/config/db';
 import { promptEngineeringCourse } from '../src/data/seeds/prompt-engineering-course';
+import { STARTER_COURSES } from '../src/data/seeds/starter-courses';
 import { generativeAiMcqs } from '../src/data/seeds/generative-ai-sample';
 import { Chapter } from '../src/models/Chapter';
 import { Course } from '../src/models/Course';
 import { FlashCard } from '../src/models/FlashCard';
 import { Lesson } from '../src/models/Lesson';
 import { Track } from '../src/models/Track';
+import type { SeedCourseDefinition } from '../src/data/seeds/starter-courses';
 import {
   persistLessonContent,
   updateCourseDuration,
 } from '../src/services/contentPersistence.service';
+
+const ALL_COURSES: SeedCourseDefinition[] = [
+  promptEngineeringCourse,
+  ...STARTER_COURSES,
+];
+
+async function seedCourse(def: SeedCourseDefinition) {
+  const course = await Course.findOneAndUpdate(
+    { trackSlug: def.trackSlug, title: def.course.title },
+    { $set: { ...def.course, trackSlug: def.trackSlug, isPublished: true } },
+    { upsert: true, new: true },
+  );
+  console.log(`Seeded course [${def.trackSlug}]:`, course.title);
+
+  await Lesson.deleteMany({ courseId: course._id });
+  for (const item of def.lessons) {
+    await persistLessonContent({
+      course,
+      payload: item.payload,
+      order: item.order,
+      moduleKey: item.moduleKey,
+    });
+    console.log('  lesson:', item.payload.title);
+  }
+  await updateCourseDuration(course._id);
+}
 
 async function seed() {
   const uri =
@@ -30,25 +58,9 @@ async function seed() {
   }
   console.log(`Seeded ${TRACKS.length} tracks`);
 
-  const pe = promptEngineeringCourse;
-  const course = await Course.findOneAndUpdate(
-    { trackSlug: pe.trackSlug, title: pe.course.title },
-    { $set: { ...pe.course, trackSlug: pe.trackSlug, isPublished: true } },
-    { upsert: true, new: true },
-  );
-  console.log('Seeded course:', course.title);
-
-  await Lesson.deleteMany({ courseId: course._id });
-  for (const item of pe.lessons) {
-    await persistLessonContent({
-      course,
-      payload: item.payload,
-      order: item.order,
-      moduleKey: item.moduleKey,
-    });
-    console.log('  lesson:', item.payload.title);
+  for (const def of ALL_COURSES) {
+    await seedCourse(def);
   }
-  await updateCourseDuration(course._id);
 
   await Chapter.findOneAndUpdate(
     { trackSlug: 'generative-ai', moduleKey: 'agents-apis', title: 'AI agents overview' },
@@ -68,8 +80,14 @@ async function seed() {
     { upsert: true },
   );
 
-  const deckCount = await FlashCard.countDocuments({ trackSlug: 'generative-ai' });
-  console.log(`Flash decks for generative-ai: ${deckCount}`);
+  console.log('\nCourses per track:');
+  for (const track of TRACKS) {
+    const count = await Course.countDocuments({ trackSlug: track.slug, isPublished: true });
+    console.log(`  ${track.slug}: ${count}`);
+  }
+
+  const deckCount = await FlashCard.countDocuments();
+  console.log(`\nTotal flash decks: ${deckCount}`);
   console.log('Seed complete');
   process.exit(0);
 }

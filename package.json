@@ -8,6 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx scripts/seed-academy.ts && tsx src/index.ts",
     "seed": "tsx scripts/seed-academy.ts",
+    "seed:gemini": "tsx scripts/seed-via-gemini.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
