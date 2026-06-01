@@ -56,6 +56,7 @@ api.use('/flagged', flaggedRoutes);
 api.use('/event', eventRoutes);
 api.use(homepageRoutes);
 
+app.use('/api', api);
 app.use('/', api);
 
 async function start() {

@@ -9,6 +9,15 @@ import { serializeUser } from '../utils/serializeUser';
 
 const router = Router();
 
+const MIN_PASSWORD_LENGTH = 8;
+
+function defaultUsername(email: string, username?: string): string {
+  const trimmed = typeof username === 'string' ? username.trim() : '';
+  if (trimmed) return trimmed;
+  const local = email.split('@')[0]?.replace(/[^a-zA-Z0-9_-]/g, '_') || 'user';
+  return local.slice(0, 30) || 'user';
+}
+
 router.post('/signup', async (req, res) => {
   try {
     const {
@@ -21,17 +30,26 @@ router.post('/signup', async (req, res) => {
       targetRole,
     } = req.body;
 
-    if (!username || !email || !password) {
-      return fail(res, 'username, email, and password are required');
+    if (!email || !password) {
+      return fail(res, 'email and password are required');
     }
 
-    const exists = await User.findOne({ email: email.toLowerCase() });
-    if (exists) return fail(res, 'Email already registered');
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+      return fail(res, `password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+    if (!normalizedEmail.includes('@')) {
+      return fail(res, 'email must be valid');
+    }
+
+    const exists = await User.findOne({ email: normalizedEmail });
+    if (exists) return fail(res, 'Email already registered', 409);
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({
-      username,
-      email: email.toLowerCase(),
+      username: defaultUsername(normalizedEmail, username),
+      email: normalizedEmail,
       password: hashed,
       subscriptionPlan: subscriptionPlan ?? 'free',
       careerGoal: careerGoal ?? '',
