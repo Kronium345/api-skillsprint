@@ -6,6 +6,7 @@ import { Lesson } from '../models/Lesson';
 import { LessonFlashcard } from '../models/LessonFlashcard';
 import { LessonProgress } from '../models/LessonProgress';
 import { LessonQuiz } from '../models/LessonQuiz';
+import { recomputeUserChallengeState } from '../services/challenges.service';
 import { fail, ok, serverError } from '../utils/apiResponse';
 
 export async function listCourses(req: AuthRequest, res: Response) {
@@ -141,6 +142,7 @@ export async function completeLesson(req: AuthRequest, res: Response) {
     req.user!.streakCount = Math.max(1, (req.user!.streakCount ?? 0) + 1);
     req.user!.lastActiveAt = new Date();
     await req.user!.save();
+    await recomputeUserChallengeState(req.user!._id);
 
     return ok(res, {
       progress,

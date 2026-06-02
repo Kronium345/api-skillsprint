@@ -15,6 +15,7 @@ import flaggedRoutes from './routes/flagged.routes';
 import flashRoutes, { fquizRouter } from './routes/flash.routes';
 import homepageRoutes from './routes/homepage.routes';
 import aiRoutes from './routes/ai.routes';
+import challengesRoutes from './routes/challenges.routes';
 import coursesRoutes from './routes/courses.routes';
 import progressRoutes from './routes/progress.routes';
 import tracksRoutes from './routes/tracks.routes';
@@ -43,6 +44,7 @@ const api = express.Router();
 
 api.use('/auth', authRoutes);
 api.use('/ai', aiRoutes);
+api.use('/challenges', challengesRoutes);
 api.use('/courses', coursesRoutes);
 api.use('/video', videoRoutes);
 api.use('/tracks', tracksRoutes);

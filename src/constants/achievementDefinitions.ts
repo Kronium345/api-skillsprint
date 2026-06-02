@@ -1,0 +1,75 @@
+import type { IAchievementDefinition } from '../models/AchievementDefinition';
+
+type SeedAchievement = Pick<
+  IAchievementDefinition,
+  'code' | 'label' | 'description' | 'icon' | 'category' | 'criteria' | 'reward' | 'active' | 'sortOrder'
+>;
+
+export const DEFAULT_ACHIEVEMENT_DEFINITIONS: SeedAchievement[] = [
+  {
+    code: 'first-lesson',
+    label: 'First Step',
+    description: 'Complete your first lesson',
+    icon: 'rocket-outline',
+    category: 'learning',
+    criteria: { metric: 'completed_lessons', threshold: 1 },
+    reward: { badgeTier: 'bronze' },
+    active: true,
+    sortOrder: 1,
+  },
+  {
+    code: 'lesson-sprint',
+    label: 'Lesson Sprint',
+    description: 'Complete 5 lessons',
+    icon: 'flash-outline',
+    category: 'learning',
+    criteria: { metric: 'completed_lessons', threshold: 5 },
+    reward: { badgeTier: 'silver' },
+    active: true,
+    sortOrder: 2,
+  },
+  {
+    code: 'course-finisher',
+    label: 'Course Finisher',
+    description: 'Complete your first course',
+    icon: 'school-outline',
+    category: 'completion',
+    criteria: { metric: 'completed_courses', threshold: 1 },
+    reward: { badgeTier: 'silver', xpBonus: 50 },
+    active: true,
+    sortOrder: 3,
+  },
+  {
+    code: 'track-explorer',
+    label: 'Track Explorer',
+    description: 'Start learning in 2 different tracks',
+    icon: 'map-outline',
+    category: 'completion',
+    criteria: { metric: 'started_tracks', threshold: 2 },
+    reward: { badgeTier: 'silver' },
+    active: true,
+    sortOrder: 4,
+  },
+  {
+    code: 'xp-master',
+    label: 'XP Master',
+    description: 'Reach 500 total XP',
+    icon: 'trophy-outline',
+    category: 'xp',
+    criteria: { metric: 'xp_total', threshold: 500 },
+    reward: { badgeTier: 'gold' },
+    active: true,
+    sortOrder: 5,
+  },
+  {
+    code: 'streak-keeper',
+    label: 'Streak Keeper',
+    description: 'Maintain a 7-day streak',
+    icon: 'flame-outline',
+    category: 'streak',
+    criteria: { metric: 'streak_count', threshold: 7 },
+    reward: { badgeTier: 'gold' },
+    active: true,
+    sortOrder: 6,
+  },
+];
